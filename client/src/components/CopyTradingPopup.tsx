@@ -79,18 +79,15 @@ const COUNTRY_CODES = [
     { code: "+43", flag: "🇦🇹", name: "Austria" },
 ];
 
-/* ─── Zod Schema ─────────────────────────────────────────────────────────
-   - checks remain strict (consent must be true)
-   - minor improvement: age refined to numeric + empty allowed
-*/
+/* ─── Zod Schema ───────────────────────────────────────────────────────── */
 const formSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     middleName: z.string().optional(),
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().min(1, "Email is required").email("Enter a valid email address"),
     countryCode: z.string().min(1, "Country code is required"),
-    phone: z.string().min(1, "Phone number is required").regex(/^\d{10,}$/, "Phone must be at least 10 digits"),
-    whatsappNumber: z.string().min(1, "WhatsApp number is required").regex(/^\d{10,}$/, "WhatsApp must be at least 10 digits"),
+    phone: z.string().min(1, "Phone number is required").regex(/^\d{6,}$/, "Phone must be at least 6 digits"),
+    whatsappNumber: z.string().min(1, "WhatsApp number is required").regex(/^\d{6,}$/, "WhatsApp must be at least 6 digits"),
     telegramId: z.string().min(1, "Telegram ID is required").regex(/^@?[\w.-]{3,}$/, "Enter a valid Telegram ID"),
     age: z.string().optional().refine((val) => !val || (Number(val) >= 18 && Number(val) <= 120), "Age must be 18+"),
     gender: z.string().min(1, "Please select gender"),
@@ -128,11 +125,11 @@ function SectionLabel({ icon: Icon, label, color = "text-slate-500" }: { icon: R
 }
 
 /* ─── Searchable Select (portal-based to escape overflow:hidden) ───────────
-   - adds ids for accessibility and keyboard-friendly search focus
+   - improvements: keyboard (Enter/Esc), allow custom value, accessible ids
 */
 function SearchableSelect({
     id,
-    value, onChange, options, placeholder, disabled, error,
+    value, onChange, options, placeholder, disabled, error, allowCustom = false,
 }: {
     id?: string;
     value: string;
@@ -141,21 +138,22 @@ function SearchableSelect({
     placeholder: string;
     disabled?: boolean;
     error?: string;
+    allowCustom?: boolean;
 }) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [rect, setRect] = useState<DOMRect | null>(null);
     const btnRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const selected = options.find(o => o.value === value);
-    const filtered = options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()));
+    const filtered = options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()) || o.value.toLowerCase().includes(search.toLowerCase()));
 
     const openMenu = () => {
         if (disabled) return;
         setRect(btnRef.current?.getBoundingClientRect() ?? null);
         setOpen(p => !p);
-        // reset search when opening
-        if (!open) setSearch("");
+        if (!open) setTimeout(() => { setSearch(""); inputRef.current?.focus(); }, 50);
     };
 
     // Close on outside click
@@ -171,7 +169,6 @@ function SearchableSelect({
         return () => document.removeEventListener("mousedown", handle);
     }, [open]);
 
-    // Update rect on scroll/resize while open
     useEffect(() => {
         if (!open) return;
         const update = () => setRect(btnRef.current?.getBoundingClientRect() ?? null);
@@ -197,7 +194,7 @@ function SearchableSelect({
                     } rounded-xl px-3.5 py-2.5 text-sm focus:outline-none transition-all ${disabled ? "opacity-40 cursor-not-allowed" : "hover:border-white/20 cursor-pointer"
                     }`}
             >
-                <span className={selected ? "text-white" : "text-slate-600"}>{selected?.label || placeholder}</span>
+                <span className={selected?.label ? "text-white" : "text-slate-600"}>{selected?.label || placeholder}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
             </button>
 
@@ -206,9 +203,9 @@ function SearchableSelect({
                     ref={menuRef}
                     style={{
                         position: "fixed",
-                        top: Math.min(rect.bottom + 8, window.innerHeight - 60),
+                        top: Math.min(rect.bottom + 8, window.innerHeight - 80),
                         left: Math.max(8, rect.left),
-                        width: rect.width,
+                        width: Math.max(rect.width, 220),
                         zIndex: 9999,
                     }}
                     className="bg-[#0e1c30] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
@@ -219,16 +216,28 @@ function SearchableSelect({
                         <div className="flex items-center gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
                             <Search className="w-3 h-3 text-slate-500 flex-shrink-0" />
                             <input
+                                ref={inputRef}
                                 aria-label="Search options"
-                                autoFocus
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                placeholder="Search..."
+                                onKeyDown={(e) => {
+                                    if (e.key === "Escape") { setOpen(false); }
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        if (filtered.length > 0) {
+                                            onChange(filtered[0].value); setOpen(false); setSearch("");
+                                        } else if (allowCustom && search.trim()) {
+                                            onChange(search.trim()); setOpen(false); setSearch("");
+                                        }
+                                    }
+                                }}
+                                autoFocus
+                                placeholder="Search... (type and press Enter)"
                                 className="bg-transparent text-white text-xs outline-none flex-1 placeholder:text-slate-600"
                             />
                         </div>
                     </div>
-                    <div className="max-h-56 overflow-y-auto">
+                    <div className="max-h-[45vh] overflow-y-auto">
                         {filtered.length === 0 ? (
                             <div className="px-3 py-3 text-slate-600 text-xs text-center">No results</div>
                         ) : filtered.map(o => (
@@ -236,14 +245,27 @@ function SearchableSelect({
                                 key={o.value}
                                 type="button"
                                 onClick={() => { onChange(o.value); setOpen(false); setSearch(""); }}
-                                className={`flex w-full px-3.5 py-2 text-sm hover:bg-white/[0.04] text-left transition-colors ${o.value === value ? "text-white bg-white/[0.05]" : "text-slate-300"
-                                    }`}
+                                className={`flex w-full px-3.5 py-2 text-sm hover:bg-white/[0.04] text-left transition-colors ${o.value === value ? "text-white bg-white/[0.05]" : "text-slate-300" }
+                                `}
                                 role="option"
                                 aria-selected={o.value === value}
                             >
                                 {o.label}
                             </button>
                         ))}
+
+                        {/* allow entering custom value */}
+                        {allowCustom && search.trim() !== "" && !options.some(o => o.label.toLowerCase() === search.trim().toLowerCase()) && (
+                            <div className="px-3 py-2 border-t border-white/10">
+                                <button
+                                    type="button"
+                                    onClick={() => { onChange(search.trim()); setOpen(false); setSearch(""); }}
+                                    className="w-full text-left text-sm px-3 py-2 hover:bg-white/[0.04] rounded"
+                                >
+                                    Use "{search.trim()}"
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>,
                 document.body
@@ -253,7 +275,7 @@ function SearchableSelect({
 }
 
 /* ─── Country Code Picker (portal-based) ────────────────────────────────
-   - same UX but safer widths and keyboard-friendly numeric entry
+   - improvements: search + allow typing full code manually and press Enter
 */
 function CountryCodePicker({ value, onChange, error }: { value: string; onChange: (v: string) => void; error?: string }) {
     const [open, setOpen] = useState(false);
@@ -261,6 +283,7 @@ function CountryCodePicker({ value, onChange, error }: { value: string; onChange
     const [rect, setRect] = useState<DOMRect | null>(null);
     const btnRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const selected = COUNTRY_CODES.find(c => c.code === value) || COUNTRY_CODES[0];
     const filtered = COUNTRY_CODES.filter(c =>
@@ -270,7 +293,7 @@ function CountryCodePicker({ value, onChange, error }: { value: string; onChange
     const openMenu = () => {
         setRect(btnRef.current?.getBoundingClientRect() ?? null);
         setOpen(p => !p);
-        if (!open) setSearch("");
+        if (!open) setTimeout(() => inputRef.current?.focus(), 50);
     };
 
     useEffect(() => {
@@ -317,7 +340,7 @@ function CountryCodePicker({ value, onChange, error }: { value: string; onChange
                     ref={menuRef}
                     style={{
                         position: "fixed",
-                        top: Math.min(rect.bottom + 8, window.innerHeight - 60),
+                        top: Math.min(rect.bottom + 8, window.innerHeight - 80),
                         left: Math.max(8, rect.left),
                         width: Math.max(rect.width, 220),
                         zIndex: 9999,
@@ -328,17 +351,41 @@ function CountryCodePicker({ value, onChange, error }: { value: string; onChange
                         <div className="flex items-center gap-2 bg-white/[0.03] rounded-lg px-2 py-1.5">
                             <Search className="w-3 h-3 text-slate-500" />
                             <input
+                                ref={inputRef}
                                 aria-label="Search country codes"
-                                autoFocus
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                placeholder="Search..."
+                                onKeyDown={(e) => {
+                                    if (e.key === "Escape") { setOpen(false); }
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        const trimmed = search.trim();
+                                        // if user typed a direct code like +44 or 44
+                                        if (/^\+?\d{1,4}$/.test(trimmed)) {
+                                            const chosen = trimmed.startsWith("+") ? trimmed : `+${trimmed}`;
+                                            onChange(chosen);
+                                            setOpen(false);
+                                            setSearch("");
+                                            return;
+                                        }
+                                        // otherwise pick first filtered
+                                        if (filtered.length > 0) {
+                                            onChange(filtered[0].code);
+                                            setOpen(false);
+                                            setSearch("");
+                                        }
+                                    }
+                                }}
+                                autoFocus
+                                placeholder="Search name or code (eg. +91)"
                                 className="bg-transparent text-white text-xs outline-none flex-1 placeholder:text-slate-600"
                             />
                         </div>
                     </div>
-                    <div className="max-h-56 overflow-y-auto">
-                        {filtered.map((c, i) => (
+                    <div className="max-h-[45vh] overflow-y-auto">
+                        {filtered.length === 0 ? (
+                            <div className="px-3 py-3 text-slate-600 text-xs text-center">No results</div>
+                        ) : filtered.map((c, i) => (
                             <button
                                 key={`${c.code}-${c.name}-${i}`}
                                 type="button"
@@ -366,7 +413,6 @@ function ConsentCheckbox({ checked, onToggle, accentClass, checkBgClass, childre
     return (
         <div>
             <div className={`flex items-start gap-3 p-3.5 rounded-xl border transition-colors ${checked ? accentClass : "bg-white/[0.03] border-white/10"}`}>
-                {/* Only the square toggles */}
                 <button
                     type="button"
                     onClick={onToggle}
@@ -386,7 +432,7 @@ function ConsentCheckbox({ checked, onToggle, accentClass, checkBgClass, childre
     );
 }
 
-/* ─── Terms Modal ──────────────────────────────────────────────────────── */
+/* ─── Terms Modal (unchanged) ─────────────────────────────────────────── */
 const termsSections = [
     { icon: DollarSign, color: "text-amber-400", bg: "bg-amber-500/10", title: "1. Entry Fee — Not an Investment", content: ["The $100 (USD) participation fee is strictly an ENTRY FEE — not an investment, deposit, or capital contribution.", "Payment does not entitle the participant to any profit, return, or guaranteed income.", "TechForex is not a fund manager, investment advisor, or registered financial institution."] },
     { icon: RefreshCw, color: "text-red-400", bg: "bg-red-500/10", title: "2. No Refund Policy", content: ["All entry fees are strictly non-refundable under all circumstances, including voluntary withdrawal, failure to meet targets, technical issues, disqualification, or personal circumstances.", "By submitting the registration form, the participant irrevocably agrees to this no-refund policy."] },
@@ -496,7 +542,8 @@ export function CopyTradingPopup({ externalTrigger, onExternalTriggerConsumed }:
     const [submissionError, setSubmissionError] = useState<string | null>(null);
 
     /* Build country options from country-state-city */
-    const countryOptions = Country.getAllCountries().map(c => ({ value: c.isoCode, label: `${c.name}` }));
+    const allCountries = Country.getAllCountries();
+    const countryOptions = allCountries.map(c => ({ value: c.isoCode, label: `${c.name}` }));
 
     const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting }, reset } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -554,15 +601,15 @@ export function CopyTradingPopup({ externalTrigger, onExternalTriggerConsumed }:
     const onSubmit = async (data: FormValues) => {
         setSubmissionError(null);
         try {
-            // Resolve human-friendly country/state names if available
-            const selectedCountryName = Country.getCountryByCode ? Country.getCountryByCode(data.countryIso)?.name || data.countryIso : data.countryIso;
-            const selectedStateName = State.getStateByCodeAndCountry ? State.getStateByCodeAndCountry(data.stateIso, data.countryIso)?.name || data.stateIso : data.stateIso;
+            // Resolve human-friendly country/state names using the cached lists (avoid library helper name mismatch)
+            const selectedCountry = allCountries.find(c => c.isoCode === data.countryIso);
+            const selectedState = State.getStatesOfCountry(data.countryIso || "").find(s => s.isoCode === data.stateIso);
 
             const payload = {
                 ...data,
                 age: data.age ? Number(data.age) : null,
-                country: selectedCountryName,
-                state: selectedStateName,
+                country: selectedCountry?.name || data.countryIso,
+                state: selectedState?.name || data.stateIso,
                 riskAccepted: true,
                 feeAccepted: true,
                 termsAccepted: true,
@@ -737,7 +784,6 @@ export function CopyTradingPopup({ externalTrigger, onExternalTriggerConsumed }:
                                                                 pattern="\d*"
                                                                 className={inputCls}
                                                                 onKeyDown={(e) => {
-                                                                    // allow navigation keys, backspace, ctrl/cmd shortcuts
                                                                     if (["Backspace", "ArrowLeft", "ArrowRight", "Tab", "Delete"].includes(e.key)) return;
                                                                     if (!/^[0-9]$/.test(e.key)) e.preventDefault();
                                                                 }}
@@ -791,11 +837,12 @@ export function CopyTradingPopup({ externalTrigger, onExternalTriggerConsumed }:
                                                         <label className={labelCls}>Gender *</label>
                                                         <SearchableSelect
                                                             id="gender"
-                                                            value={watch("gender")}
+                                                            value={watch("gender") || ""}
                                                             onChange={v => setValue("gender", v)}
                                                             options={[{ value: "Male", label: "Male" }, { value: "Female", label: "Female" }, { value: "Other", label: "Other" }]}
                                                             placeholder="Select..."
                                                             error={errors.gender?.message}
+                                                            allowCustom={false}
                                                         />
                                                         <FieldError msg={errors.gender?.message} />
                                                     </div>
@@ -808,11 +855,12 @@ export function CopyTradingPopup({ externalTrigger, onExternalTriggerConsumed }:
                                                     <label className={labelCls}>Country *</label>
                                                     <SearchableSelect
                                                         id="countryIso"
-                                                        value={selectedCountryIso}
+                                                        value={selectedCountryIso || ""}
                                                         onChange={v => { setValue("countryIso", v); setValue("stateIso", ""); setValue("city", ""); }}
                                                         options={countryOptions}
                                                         placeholder="Select Country..."
                                                         error={errors.countryIso?.message}
+                                                        allowCustom={false}
                                                     />
                                                     <FieldError msg={errors.countryIso?.message} />
                                                 </div>
@@ -823,12 +871,13 @@ export function CopyTradingPopup({ externalTrigger, onExternalTriggerConsumed }:
                                                         <label className={labelCls}>State *</label>
                                                         <SearchableSelect
                                                             id="stateIso"
-                                                            value={selectedStateIso}
+                                                            value={selectedStateIso || ""}
                                                             onChange={v => { setValue("stateIso", v); setValue("city", ""); }}
                                                             options={stateOptions}
                                                             placeholder="Select State..."
                                                             disabled={!selectedCountryIso}
                                                             error={errors.stateIso?.message}
+                                                            allowCustom={false}
                                                         />
                                                         <FieldError msg={errors.stateIso?.message} />
                                                     </div>
@@ -836,12 +885,13 @@ export function CopyTradingPopup({ externalTrigger, onExternalTriggerConsumed }:
                                                         <label className={labelCls}>City *</label>
                                                         <SearchableSelect
                                                             id="city"
-                                                            value={watch("city")}
+                                                            value={watch("city") || ""}
                                                             onChange={v => setValue("city", v)}
                                                             options={cityOptions}
                                                             placeholder="Select City..."
                                                             disabled={!selectedStateIso}
                                                             error={errors.city?.message}
+                                                            allowCustom={true} // allow typing city manually
                                                         />
                                                         <FieldError msg={errors.city?.message} />
                                                     </div>
