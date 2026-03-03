@@ -26,25 +26,41 @@ const footerLinks = [
       { label: "About Shivam", href: "/contact" },
       { label: "Student Results", href: "/" },
       { label: "Contact Us", href: "/contact" },
-      // WhatsApp support removed
     ],
   },
 ];
 
+// Social media with official brand colors
 const socials = [
-  { icon: Instagram, href: "https://www.instagram.com/charts.pattern", label: "Instagram", color: "hover:text-pink-400" },
-  { icon: Send, href: "https://t.me/techf0rex", label: "Telegram", color: "hover:text-sky-400" },
-  { icon: Twitter, href: "#", label: "Twitter", color: "hover:text-sky-400" }, // kept Twitter, can adjust if needed
+  {
+    icon: Instagram,
+    href: "https://www.instagram.com/charts.pattern",
+    label: "Instagram",
+    defaultColor: "text-pink-500",
+    hoverColor: "hover:text-pink-400",
+  },
+  {
+    icon: Send,
+    href: "https://t.me/techf0rex",
+    label: "Telegram",
+    defaultColor: "text-sky-500",
+    hoverColor: "hover:text-sky-400",
+  },
+  {
+    icon: Twitter,  // Using Twitter icon for X (formerly Twitter)
+    href: "https://x.com/techforexvip?s=21",
+    label: "X",
+    defaultColor: "text-sky-500",
+    hoverColor: "hover:text-sky-400",
+  },
 ];
 
 export function Footer() {
   return (
     <footer className="bg-[#050d18] border-t border-white/[0.05]">
       <div className="container mx-auto px-4 py-16">
-
         {/* Main grid */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10 mb-12">
-
           {/* Brand */}
           <div className="col-span-2 md:col-span-2">
             <div className="flex items-center gap-3 mb-5">
@@ -54,13 +70,15 @@ export function Footer() {
                 className="h-10 w-auto"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
-              <span className="text-xl font-black text-white tracking-tight">Tech<span className="text-blue-400">Forex</span></span>
+              <span className="text-xl font-black text-white tracking-tight">
+                Tech<span className="text-blue-400">Forex</span>
+              </span>
             </div>
             <p className="text-slate-500 text-sm max-w-sm leading-relaxed mb-7">
               India's premier forex & stock trading education platform. Learn from a professional with 9+ years of proven market experience.
             </p>
 
-            {/* Social Links */}
+            {/* Social Links – now with brand colors */}
             <div className="flex gap-3">
               {socials.map((s) => (
                 <a
@@ -69,7 +87,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className={`w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-slate-500 ${s.color} hover:border-white/20 transition-all`}
+                  className={`w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center ${s.defaultColor} ${s.hoverColor} hover:border-white/20 transition-all`}
                 >
                   <s.icon className="w-4 h-4" />
                 </a>
@@ -109,13 +127,12 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/[0.05]">
-          {/* Address & Copyright */}
           <div className="flex flex-wrap gap-y-4 justify-between items-center mb-5">
             <div className="text-slate-600 text-xs font-medium">Dubai, U.A.E</div>
-            <p className="text-slate-700 text-xs">© {new Date().getFullYear()} TechForex. All rights reserved.</p>
+            <p className="text-slate-700 text-xs">
+              © {new Date().getFullYear()} TechForex. All rights reserved.
+            </p>
           </div>
-
-          {/* Terms & Conditions link (replaces old disclaimer) */}
           <p className="text-slate-700 text-xs leading-relaxed">
             <Link href="/terms">
               <span className="underline hover:text-blue-400 cursor-pointer">Terms & Conditions</span>
