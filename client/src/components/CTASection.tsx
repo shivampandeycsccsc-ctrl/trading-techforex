@@ -42,7 +42,7 @@ export function CTASection() {
             transition={{ delay: 0.15 }}
             className="text-slate-300 text-lg lg:text-xl leading-relaxed mb-10 max-w-2xl mx-auto"
           >
-            Join 5,000+ students who have transformed their financial future with TechForex. Get 60% OFF on your enrollment today — limited seats available.
+            Join 17,000+ students who have transformed their financial future with TechForex. Get on your enrollment today — limited seats available.
           </motion.p>
 
           {/* Seats Counter */}
@@ -72,7 +72,7 @@ export function CTASection() {
             <Link href="/education">
               <button className="group px-6 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-black rounded-2xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-700/50 hover:scale-[1.03] transition-all flex items-center justify-center gap-3 text-base sm:text-lg">
                 <Zap className="w-5 h-5" />
-                Enroll Now — 60% OFF
+                Enroll Now 
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
