@@ -65,7 +65,7 @@ export function HeroSection({ onCopyChallengeTrigger }: HeroSectionProps) {
             </span>
             <span className="text-white/60 font-normal hidden sm:inline">🚀</span>
             <span>
-              <span className="text-emerald-400 font-black">Copy Trading Challenge</span>
+              <span className="text-emerald-400 font-black">$100 Copy Trading Challenge</span>
               <span className="text-white/50 mx-2">·</span>
               <span className="text-slate-300">Join now and let experts trade for you</span>
             </span>
