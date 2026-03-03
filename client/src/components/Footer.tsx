@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Lock, Shield, CheckCircle2, Youtube, Instagram, Twitter, Linkedin } from "lucide-react";
+import { Lock, Shield, CheckCircle2, Instagram, Twitter, Send } from "lucide-react";
 
 const footerLinks = [
   {
@@ -26,16 +26,15 @@ const footerLinks = [
       { label: "About Shivam", href: "/contact" },
       { label: "Student Results", href: "/" },
       { label: "Contact Us", href: "/contact" },
-      { label: "WhatsApp Support", href: "https://wa.me/919876543210" },
+      // WhatsApp support removed
     ],
   },
 ];
 
 const socials = [
-  { icon: Youtube, href: "#", label: "YouTube", color: "hover:text-red-400" },
-  { icon: Instagram, href: "#", label: "Instagram", color: "hover:text-pink-400" },
-  { icon: Twitter, href: "#", label: "Twitter", color: "hover:text-sky-400" },
-  { icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:text-blue-400" },
+  { icon: Instagram, href: "https://www.instagram.com/charts.pattern", label: "Instagram", color: "hover:text-pink-400" },
+  { icon: Send, href: "https://t.me/techf0rex", label: "Telegram", color: "hover:text-sky-400" },
+  { icon: Twitter, href: "#", label: "Twitter", color: "hover:text-sky-400" }, // kept Twitter, can adjust if needed
 ];
 
 export function Footer() {
@@ -58,7 +57,7 @@ export function Footer() {
               <span className="text-xl font-black text-white tracking-tight">Tech<span className="text-blue-400">Forex</span></span>
             </div>
             <p className="text-slate-500 text-sm max-w-sm leading-relaxed mb-7">
-              India's premier forex & stock trading education platform. Learn from a NISM-certified professional with 8+ years of proven market experience.
+              India's premier forex & stock trading education platform. Learn from a professional with 9+ years of proven market experience.
             </p>
 
             {/* Social Links */}
@@ -67,6 +66,8 @@ export function Footer() {
                 <a
                   key={s.label}
                   href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={s.label}
                   className={`w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-slate-500 ${s.color} hover:border-white/20 transition-all`}
                 >
@@ -108,24 +109,17 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/[0.05]">
+          {/* Address & Copyright */}
           <div className="flex flex-wrap gap-y-4 justify-between items-center mb-5">
-            <div className="flex items-center gap-6 flex-wrap">
-              {[
-                { icon: Lock, text: "SSL Secured" },
-                { icon: Shield, text: "NISM Certified" },
-                { icon: CheckCircle2, text: "7-Day Refund" },
-              ].map((badge) => (
-                <div key={badge.text} className="flex items-center gap-2 text-slate-600 text-xs font-medium">
-                  <badge.icon className="w-3.5 h-3.5 text-emerald-500" />
-                  {badge.text}
-                </div>
-              ))}
-            </div>
+            <div className="text-slate-600 text-xs font-medium">Dubai, U.A.E</div>
             <p className="text-slate-700 text-xs">© {new Date().getFullYear()} TechForex. All rights reserved.</p>
           </div>
 
-          <p className="text-slate-700 text-xs leading-relaxed max-w-4xl">
-            <strong className="text-slate-600">Risk Disclaimer:</strong> Trading financial instruments involves substantial risk of loss and is not suitable for all investors. Past performance of any trading strategy is not necessarily indicative of future results. Educational content is for informational purposes only and does not constitute financial advice. Please trade responsibly.
+          {/* Terms & Conditions link (replaces old disclaimer) */}
+          <p className="text-slate-700 text-xs leading-relaxed">
+            <Link href="/terms">
+              <span className="underline hover:text-blue-400 cursor-pointer">Terms & Conditions</span>
+            </Link> – Includes risk disclaimer and non‑refundable policy.
           </p>
         </div>
       </div>
