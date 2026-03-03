@@ -121,7 +121,7 @@ export function HeroSection({ onCopyChallengeTrigger }: HeroSectionProps) {
               transition={{ delay: 0.2 }}
               className="text-slate-300 text-lg lg:text-xl leading-relaxed mb-10 max-w-xl"
             >
-              Join India's most trusted trading education platform. Learn price action, options flow, and live trading from a NISM-certified professional with 8+ years of market experience.
+              Join India's most trusted trading education platform. Learn price action, options flow, and live trading with 9+ years of market experience.
             </motion.p>
 
             {/* Checkmarks */}
@@ -241,7 +241,7 @@ export function HeroSection({ onCopyChallengeTrigger }: HeroSectionProps) {
                 <Award className="w-5 h-5 text-yellow-400" />
               </div>
               <div>
-                <div className="text-white font-black text-xs">NISM Certified</div>
+                <div className="text-white font-black text-xs"> </div>
                 <div className="text-slate-500 text-[10px]">Market Professional</div>
               </div>
             </motion.div>
