@@ -6,6 +6,8 @@
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
     "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
     "strict": true,
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "preserve",
@@ -20,4 +22,4 @@
       "@shared/*": ["./shared/*"]
     }
   }
-}
+} 
