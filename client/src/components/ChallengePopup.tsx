@@ -216,8 +216,10 @@ export function ChallengePopup({ externalTrigger, onExternalTriggerConsumed }: C
                                         $100 to $10,000
                                     </span>
                                     <br />
+                                    <br>
                                     Trading Challenge
-                                </h2>
+                               </br> 
+                                    </h2>
 
                                 <p className="text-slate-400 text-base mb-10 max-w-xs">
                                     Ready to prove your trading skills? Join India's most exciting live trading challenge.
