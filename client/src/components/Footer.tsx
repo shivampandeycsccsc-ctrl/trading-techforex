@@ -47,7 +47,7 @@ const socials = [
     hoverColor: "hover:text-sky-400",
   },
   {
-    icon: Twitter,  // Using Twitter icon for X (formerly Twitter)
+    icon: Twitter,
     href: "https://x.com/techforexvip?s=21",
     label: "X",
     defaultColor: "text-sky-500",
@@ -78,7 +78,7 @@ export function Footer() {
               India's premier forex & stock trading education platform. Learn from a professional with 9+ years of proven market experience.
             </p>
 
-            {/* Social Links – now with brand colors */}
+            {/* Social Links */}
             <div className="flex gap-3">
               {socials.map((s) => (
                 <a
@@ -127,12 +127,27 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/[0.05]">
-          <div className="flex flex-wrap gap-y-4 justify-between items-center mb-5">
+          <div className="flex flex-wrap gap-y-4 justify-between items-center mb-3">
             <div className="text-slate-600 text-xs font-medium">Dubai, U.A.E</div>
             <p className="text-slate-700 text-xs">
               © {new Date().getFullYear()} TechForex. All rights reserved.
             </p>
           </div>
+
+          {/* Designed & developed by rankriseusa */}
+          <p className="text-slate-600 text-xs mb-3">
+            Designed and developed by{" "}
+            <a
+              href="https://rankriseusa.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 transition-colors underline underline-offset-2"
+            >
+              rankriseusa
+            </a>
+          </p>
+
+          {/* Terms & Conditions */}
           <p className="text-slate-700 text-xs leading-relaxed">
             <Link href="/terms">
               <span className="underline hover:text-blue-400 cursor-pointer">Terms & Conditions</span>
